@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Matt Arndt - Assignment 2 - Problem 4</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.18/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/ImageryLayer",
+        "esri/layers/support/RasterFunction"
+      ], function(Map, MapView, ImageryLayer, RasterFunction) {
+        /***************************************
+         * Set up popup template of image layer
+         **************************************/
+
+        var imagePopupTemplate = {
+          // autocasts as new PopupTemplate()
+          title: "Data from {SensorName} satellite",
+          content:
+            "Rendered NDVI Value [0-255]: <b>{Raster.ServicePixelValue} </b>" +
+            "<br/><br/>All Original Band Values ("+
+          "Coastal Aerosol,B,G,R,NIR,SWIR 1,SWIR 2 Panchormatic,Cirrus,TIRS1,TIRS2): <b>{Raster.ItemPixelValue} </b>"
+        };
+
+        /*******************************************************************
+         * Create image layer with server defined raster function templates
+         ******************************************************************/
+
+        var serviceRFT = new RasterFunction({
+          functionName: "NDVI Colorized",
+          variableName: "Raster"
+        });
+
+        var layer = new ImageryLayer({
+          url: "https://landsat2.arcgis.com/arcgis/rest/services/Landsat8_Views/ImageServer",
+          renderingRule: serviceRFT,
+          popupTemplate: imagePopupTemplate
+        });
+
+        /*************************
+         * Add image layer to map
+         ************************/
+
+        var map = new Map({
+          basemap: "hybrid",
+          layers: [layer]
+        });
+
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-92.25, 38.5],
+          zoom: 7,
+          popup: {
+            actions: []
+          }
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
